@@ -1,0 +1,23 @@
+openapi: 3.0.1
+info:
+  title: Well-Known
+  description: Well-Known
+  version: '1.0'
+servers:
+  - url: https://api.uat.p4pa.pagopa.it/pu/.well-known
+paths:
+  /jwks.json:
+    get:
+      tags:
+        - wellKnown
+      summary: jwks
+      operationId: jwks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+              example: string
+components: { }

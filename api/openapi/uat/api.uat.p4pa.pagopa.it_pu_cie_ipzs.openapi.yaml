@@ -1,0 +1,319 @@
+openapi: 3.0.1
+info:
+  title: CIE API - IPZS
+  description: Servizio cie per IPZS
+  version: '1.0'
+servers:
+  - url: https://api.uat.p4pa.pagopa.it/pu/cie/ipzs
+paths:
+  '/notices/{nav}/setStatus':
+    post:
+      tags:
+        - ipzs
+      summary: ipzsUpdateNoticeStatus
+      operationId: ipzsUpdateNoticeStatus
+      parameters:
+        - name: nav
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpzsUpdateNoticeStatusRequest'
+            example:
+              status: BURNED
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized - Missing or invalid token
+        '404':
+          description: Not Found
+        '409':
+          description: Conflict
+        '500':
+          description: Internal Server Error
+  /notices:
+    get:
+      tags:
+        - ipzs
+      summary: ipzsGetNotices
+      operationId: ipzsGetNotices
+      parameters:
+        - name: debtorFiscalCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: orgFiscalCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Zero-based page index (0..N)
+          schema:
+            minimum: 0.0
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          schema:
+            minimum: 1.0
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          description: 'Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.'
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedNoticeCieDTO'
+              example:
+                content:
+                  - status: UNPAID
+                    paymentDate: string
+                    burnDate: string
+                    nav: string
+                    reasonCode: string
+                    orgAmountCents: 0
+                    mefAmountCents: 0
+                size: 0
+                totalElements: 0
+                totalPages: 0
+                number: 0
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedNoticeCieDTO'
+              example:
+                content:
+                  - status: UNPAID
+                    paymentDate: string
+                    burnDate: string
+                    nav: string
+                    reasonCode: string
+                    orgAmountCents: 0
+                    mefAmountCents: 0
+                size: 0
+                totalElements: 0
+                totalPages: 0
+                number: 0
+        '401':
+          description: Unauthorized - Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedNoticeCieDTO'
+              example:
+                content:
+                  - status: UNPAID
+                    paymentDate: string
+                    burnDate: string
+                    nav: string
+                    reasonCode: string
+                    orgAmountCents: 0
+                    mefAmountCents: 0
+                size: 0
+                totalElements: 0
+                totalPages: 0
+                number: 0
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedNoticeCieDTO'
+              example:
+                content:
+                  - status: UNPAID
+                    paymentDate: string
+                    burnDate: string
+                    nav: string
+                    reasonCode: string
+                    orgAmountCents: 0
+                    mefAmountCents: 0
+                size: 0
+                totalElements: 0
+                totalPages: 0
+                number: 0
+  /notice:
+    get:
+      tags:
+        - ipzs
+      summary: ipzsGetNoticeByNavAndOrgFiscalCode
+      operationId: ipzsGetNoticeByNavAndOrgFiscalCode
+      parameters:
+        - name: nav
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: orgFiscalCode
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeCieDTO'
+              example:
+                status: UNPAID
+                paymentDate: string
+                burnDate: string
+                nav: string
+                reasonCode: string
+                orgAmountCents: 0
+                mefAmountCents: 0
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeCieDTO'
+              example:
+                status: UNPAID
+                paymentDate: string
+                burnDate: string
+                nav: string
+                reasonCode: string
+                orgAmountCents: 0
+                mefAmountCents: 0
+        '401':
+          description: Unauthorized - Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeCieDTO'
+              example:
+                status: UNPAID
+                paymentDate: string
+                burnDate: string
+                nav: string
+                reasonCode: string
+                orgAmountCents: 0
+                mefAmountCents: 0
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeCieDTO'
+              example:
+                status: UNPAID
+                paymentDate: string
+                burnDate: string
+                nav: string
+                reasonCode: string
+                orgAmountCents: 0
+                mefAmountCents: 0
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoticeCieDTO'
+              example:
+                status: UNPAID
+                paymentDate: string
+                burnDate: string
+                nav: string
+                reasonCode: string
+                orgAmountCents: 0
+                mefAmountCents: 0
+components:
+  schemas:
+    DebtPositionCieStatus:
+      enum:
+        - UNPAID
+        - PAID
+        - BURNED
+        - REFUNDED
+      type: string
+    IpzsUpdateNoticeStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+    StatusEnum:
+      enum:
+        - BURNED
+        - REFUNDED
+      type: string
+    NoticeCieDTO:
+      required:
+        - mefAmountCents
+        - nav
+        - orgAmountCents
+        - reasonCode
+        - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/DebtPositionCieStatus'
+        paymentDate:
+          type: string
+          format: date-time
+        burnDate:
+          type: string
+          format: date-time
+        nav:
+          type: string
+        reasonCode:
+          type: string
+        orgAmountCents:
+          type: integer
+          format: int64
+        mefAmountCents:
+          type: integer
+          format: int64
+    PagedNoticeCieDTO:
+      required:
+        - content
+        - number
+        - size
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeCieDTO'
+        size:
+          type: integer
+          format: int64
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int64
+        number:
+          type: integer
+          format: int64
+tags:
+  - name: ipzs
+    description: the ipzs API

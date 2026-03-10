@@ -1,0 +1,2985 @@
+openapi: 3.0.1
+info:
+  title: Sil API
+  description: Servizio sil per Piattaforma Unitaria
+  version: '1.0'
+servers:
+  - url: https://api.p4pa.pagopa.it/pu/sil
+paths:
+  '/organization/{orgFiscalCode}/send-notification':
+    post:
+      tags:
+        - SendNotification
+      summary: Create notification
+      description: Create initial notification
+      operationId: createSendNotification
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationRequest'
+            example:
+              organizationId: 0
+              paProtocolNumber: string
+              recipients:
+                - recipientType: PF
+                  taxId: string
+                  denomination: string
+                  physicalAddress:
+                    address: string
+                    zip: string
+                    municipality: string
+                    province: string
+                  digitalDomicile:
+                    type: PEC
+                    address: string
+                  payments:
+                    - pagoPa:
+                        noticeCode: string
+                        creditorTaxId: string
+                        applyCost: true
+                        attachment:
+                          digest: string
+                          contentType: string
+                          fileName: string
+                      f24:
+                        title: string
+                        applyCost: true
+                        metadataAttachment:
+                          digest: string
+                          contentType: string
+                          fileName: string
+              documents:
+                - digest: string
+                  contentType: string
+                  fileName: string
+              notificationFeePolicy: FLAT_RATE
+              physicalCommunicationType: AR_REGISTERED_LETTER
+              senderDenomination: string
+              senderTaxId: string
+              amount: 0
+              paymentExpirationDate: string
+              taxonomyCode: string
+              paFee: 0
+              vat: 0
+              pagoPaIntMode: SYNC
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotificationResponse'
+              example:
+                sendNotificationId: string
+                preloadUrl: string
+                status: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotificationResponse'
+              example:
+                sendNotificationId: string
+                preloadUrl: string
+                status: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotificationResponse'
+              example:
+                sendNotificationId: string
+                preloadUrl: string
+                status: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateNotificationResponse'
+              example:
+                sendNotificationId: string
+                preloadUrl: string
+                status: string
+  '/organization/{orgFiscalCode}/send-notification/{sendNotificationId}':
+    get:
+      tags:
+        - SendNotification
+      summary: get send notification
+      description: get send notification
+      operationId: getSendNotification
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+              example:
+                sendNotificationId: string
+                organizationId: 0
+                iun: string
+                payments:
+                  - debtPositionId: 0
+                    navList:
+                      - string
+                    notificationDate: string
+                status: WAITING_FILE
+                errors:
+                  - string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+              example:
+                sendNotificationId: string
+                organizationId: 0
+                iun: string
+                payments:
+                  - debtPositionId: 0
+                    navList:
+                      - string
+                    notificationDate: string
+                status: WAITING_FILE
+                errors:
+                  - string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+              example:
+                sendNotificationId: string
+                organizationId: 0
+                iun: string
+                payments:
+                  - debtPositionId: 0
+                    navList:
+                      - string
+                    notificationDate: string
+                status: WAITING_FILE
+                errors:
+                  - string
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+              example:
+                sendNotificationId: string
+                organizationId: 0
+                iun: string
+                payments:
+                  - debtPositionId: 0
+                    navList:
+                      - string
+                    notificationDate: string
+                status: WAITING_FILE
+                errors:
+                  - string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendNotificationDTO'
+              example:
+                sendNotificationId: string
+                organizationId: 0
+                iun: string
+                payments:
+                  - debtPositionId: 0
+                    navList:
+                      - string
+                    notificationDate: string
+                status: WAITING_FILE
+                errors:
+                  - string
+    delete:
+      tags:
+        - SendNotification
+      summary: Delete notification
+      description: Delete notification
+      operationId: deleteSendNotification
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid request
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+  '/organization/{orgFiscalCode}/debt-position/{iud}':
+    put:
+      tags:
+        - DebtPosition
+      summary: manage a single debt position
+      description: 'Service to manage a single debt position, allowing to add, modify or delete one or more installments. '
+      operationId: manageDebtPositionInstallments
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: iud
+          in: path
+          description: The IUD of any installment of the debtPosition/paymentOption that will be managed by this operation
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManageDebtPositionDTO'
+            example:
+              debtPositionDescription: string
+              validityDate: string
+              paymentOptionDescription: string
+              installments:
+                - action: I
+                  installment:
+                    installmentId: 0
+                    paymentOptionId: 0
+                    status: TO_SYNC
+                    syncStatus:
+                      syncStatusFrom: TO_SYNC
+                      syncStatusTo: TO_SYNC
+                      syncError: string
+                    iupdPagopa: string
+                    generateNotice: true
+                    iud: string
+                    iuv: string
+                    iur: string
+                    iuf: string
+                    nav: string
+                    iun: string
+                    dueDate: string
+                    switchToExpired: true
+                    notificationFeeCents: 0
+                    amountCents: 0
+                    remittanceInformation: string
+                    balance: string
+                    legacyPaymentMetadata: string
+                    debtor:
+                      entityType: F
+                      fiscalCode: string
+                      fullName: string
+                      address: string
+                      civic: string
+                      postalCode: string
+                      location: string
+                      province: string
+                      nation: string
+                      email: string
+                    transfers:
+                      - transferId: 0
+                        installmentId: 0
+                        orgFiscalCode: string
+                        orgName: string
+                        amountCents: 0
+                        remittanceInformation: string
+                        stampType: string
+                        stampHashDocument: string
+                        stampProvincialResidence: string
+                        iban: string
+                        postalIban: string
+                        category: string
+                        transferIndex: 0
+                        creationDate: string
+                        updateDate: string
+                        updateOperatorExternalId: string
+                        updateTraceId: string
+                        mbdAttachment: string
+                    notificationDate: string
+                    ingestionFlowFileId: 0
+                    ingestionFlowFileLineNumber: 0
+                    ingestionFlowFileAction: I
+                    sourceFlowName: string
+                    receiptId: 0
+                    creationDate: string
+                    updateDate: string
+                    updateOperatorExternalId: string
+                    updateTraceId: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DebtPositionDTO'
+              example:
+                debtPositionId: 0
+                iupdOrg: string
+                description: string
+                status: TO_SYNC
+                debtPositionOrigin: ORDINARY
+                organizationId: 0
+                debtPositionTypeOrgId: 0
+                validityDate: string
+                flagIuvVolatile: true
+                multiDebtor: true
+                flagPuPagoPaPayment: true
+                creationDate: string
+                updateDate: string
+                updateOperatorExternalId: string
+                updateTraceId: string
+                paymentOptions:
+                  - paymentOptionId: 0
+                    debtPositionId: 0
+                    totalAmountCents: 0
+                    status: TO_SYNC
+                    description: string
+                    paymentOptionType: SINGLE_INSTALLMENT
+                    paymentOptionIndex: 0
+                    creationDate: string
+                    updateDate: string
+                    updateOperatorExternalId: string
+                    updateTraceId: string
+                    installments:
+                      - installmentId: 0
+                        paymentOptionId: 0
+                        status: TO_SYNC
+                        syncStatus:
+                          syncStatusFrom: TO_SYNC
+                          syncStatusTo: TO_SYNC
+                          syncError: string
+                        iupdPagopa: string
+                        generateNotice: true
+                        iud: string
+                        iuv: string
+                        iur: string
+                        iuf: string
+                        nav: string
+                        iun: string
+                        dueDate: string
+                        switchToExpired: true
+                        notificationFeeCents: 0
+                        amountCents: 0
+                        remittanceInformation: string
+                        balance: string
+                        legacyPaymentMetadata: string
+                        debtor:
+                          entityType: F
+                          fiscalCode: string
+                          fullName: string
+                          address: string
+                          civic: string
+                          postalCode: string
+                          location: string
+                          province: string
+                          nation: string
+                          email: string
+                        transfers:
+                          - transferId: 0
+                            installmentId: 0
+                            orgFiscalCode: string
+                            orgName: string
+                            amountCents: 0
+                            remittanceInformation: string
+                            stampType: string
+                            stampHashDocument: string
+                            stampProvincialResidence: string
+                            iban: string
+                            postalIban: string
+                            category: string
+                            transferIndex: 0
+                            creationDate: string
+                            updateDate: string
+                            updateOperatorExternalId: string
+                            updateTraceId: string
+                            mbdAttachment: string
+                        notificationDate: string
+                        ingestionFlowFileId: 0
+                        ingestionFlowFileLineNumber: 0
+                        ingestionFlowFileAction: I
+                        sourceFlowName: string
+                        receiptId: 0
+                        creationDate: string
+                        updateDate: string
+                        updateOperatorExternalId: string
+                        updateTraceId: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/payment':
+    post:
+      tags:
+        - Payment
+      summary: request an instant payment operation
+      description: 'Request an instant payment operation, passing in input payment data, and receiving in output the url to trigger the payment operation. '
+      operationId: requestInstantPayment
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstantPaymentRequest'
+            example:
+              payments:
+                - debtPositionTypeOrgCode: string
+                  iud: string
+                  notificationFeeCents: 0
+                  totalAmountCents: 0
+                  description: string
+                  balance: string
+                  debtor:
+                    entityType: F
+                    fiscalCode: string
+                    fullName: string
+                    address: string
+                    civic: string
+                    postalCode: string
+                    location: string
+                    province: string
+                    nation: string
+                    email: string
+                  transfers:
+                    - transferId: 0
+                      installmentId: 0
+                      orgFiscalCode: string
+                      orgName: string
+                      amountCents: 0
+                      remittanceInformation: string
+                      stampType: string
+                      stampHashDocument: string
+                      stampProvincialResidence: string
+                      iban: string
+                      postalIban: string
+                      category: string
+                      transferIndex: 0
+                      creationDate: string
+                      updateDate: string
+                      updateOperatorExternalId: string
+                      updateTraceId: string
+                      mbdAttachment: string
+              callbackUrl: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+              example:
+                triggerPaymentUrl: string
+                downloadNoticeUrl: string
+                paymentId: string
+                outcome: OK
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/import':
+    post:
+      tags:
+        - Import
+      summary: request a massive import operation
+      description: 'Service to request a massive import operation. The upload of the file is done invoking the url returned by this service. '
+      operationId: massiveImportRequest
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportFileRequestDTO'
+            example:
+              importFileType: RECEIPT
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportFileResponseDTO'
+              example:
+                importId: string
+                uploadUrl: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/export/paid':
+    post:
+      tags:
+        - Export
+      summary: request a massive export operation
+      description: Service to request a massive export operation.
+      operationId: massivePaidExportRequest
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaidExportRequestDTO'
+            example:
+              orgFiscalCode: string
+              fileVersion: string
+              exportFilters:
+                paymentDateTime:
+                  from: string
+                  to: string
+                installmentUpdateDateTime:
+                  from: string
+                  to: string
+                debtPositionTypeOrgCode: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportFileResponseDTO'
+              example:
+                exportId: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/export/classifications':
+    post:
+      tags:
+        - Export
+      summary: request a massive export operation
+      description: Service to request a massive export operation.
+      operationId: massiveClassificationsExportRequest
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClassificationsExportRequestDTO'
+            example:
+              orgFiscalCode: string
+              fileVersion: string
+              exportFilters:
+                iuf: string
+                iud: string
+                iuv:
+                  - string
+                iur:
+                  - string
+                label:
+                  - DOPPI
+                lastClassificationDate:
+                  from: string
+                  to: string
+                payDate:
+                  from: string
+                  to: string
+                paymentDate:
+                  from: string
+                  to: string
+                regulationDate:
+                  from: string
+                  to: string
+                billDate:
+                  from: string
+                  to: string
+                regionValueDate:
+                  from: string
+                  to: string
+                regulationUniqueIdentifier: string
+                accountRegistryCode: string
+                billAmountCents: 0
+                remittanceInformation: string
+                pspCompanyName: string
+                pspLastName: string
+                debtPositionTypeOrgCodes:
+                  - string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportFileResponseDTO'
+              example:
+                exportId: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/debt-position':
+    post:
+      tags:
+        - DebtPosition
+      summary: create a single debt position
+      description: 'Service to create a single debt position. '
+      operationId: createSingleDebtPosition
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebtPositionDTO'
+            example:
+              debtPositionId: 0
+              iupdOrg: string
+              description: string
+              status: TO_SYNC
+              debtPositionOrigin: ORDINARY
+              organizationId: 0
+              debtPositionTypeOrgId: 0
+              validityDate: string
+              flagIuvVolatile: true
+              multiDebtor: true
+              flagPuPagoPaPayment: true
+              creationDate: string
+              updateDate: string
+              updateOperatorExternalId: string
+              updateTraceId: string
+              paymentOptions:
+                - paymentOptionId: 0
+                  debtPositionId: 0
+                  totalAmountCents: 0
+                  status: TO_SYNC
+                  description: string
+                  paymentOptionType: SINGLE_INSTALLMENT
+                  paymentOptionIndex: 0
+                  creationDate: string
+                  updateDate: string
+                  updateOperatorExternalId: string
+                  updateTraceId: string
+                  installments:
+                    - installmentId: 0
+                      paymentOptionId: 0
+                      status: TO_SYNC
+                      syncStatus:
+                        syncStatusFrom: TO_SYNC
+                        syncStatusTo: TO_SYNC
+                        syncError: string
+                      iupdPagopa: string
+                      generateNotice: true
+                      iud: string
+                      iuv: string
+                      iur: string
+                      iuf: string
+                      nav: string
+                      iun: string
+                      dueDate: string
+                      switchToExpired: true
+                      notificationFeeCents: 0
+                      amountCents: 0
+                      remittanceInformation: string
+                      balance: string
+                      legacyPaymentMetadata: string
+                      debtor:
+                        entityType: F
+                        fiscalCode: string
+                        fullName: string
+                        address: string
+                        civic: string
+                        postalCode: string
+                        location: string
+                        province: string
+                        nation: string
+                        email: string
+                      transfers:
+                        - transferId: 0
+                          installmentId: 0
+                          orgFiscalCode: string
+                          orgName: string
+                          amountCents: 0
+                          remittanceInformation: string
+                          stampType: string
+                          stampHashDocument: string
+                          stampProvincialResidence: string
+                          iban: string
+                          postalIban: string
+                          category: string
+                          transferIndex: 0
+                          creationDate: string
+                          updateDate: string
+                          updateOperatorExternalId: string
+                          updateTraceId: string
+                          mbdAttachment: string
+                      notificationDate: string
+                      ingestionFlowFileId: 0
+                      ingestionFlowFileLineNumber: 0
+                      ingestionFlowFileAction: I
+                      sourceFlowName: string
+                      receiptId: 0
+                      creationDate: string
+                      updateDate: string
+                      updateOperatorExternalId: string
+                      updateTraceId: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DebtPositionDTO'
+              example:
+                debtPositionId: 0
+                iupdOrg: string
+                description: string
+                status: TO_SYNC
+                debtPositionOrigin: ORDINARY
+                organizationId: 0
+                debtPositionTypeOrgId: 0
+                validityDate: string
+                flagIuvVolatile: true
+                multiDebtor: true
+                flagPuPagoPaPayment: true
+                creationDate: string
+                updateDate: string
+                updateOperatorExternalId: string
+                updateTraceId: string
+                paymentOptions:
+                  - paymentOptionId: 0
+                    debtPositionId: 0
+                    totalAmountCents: 0
+                    status: TO_SYNC
+                    description: string
+                    paymentOptionType: SINGLE_INSTALLMENT
+                    paymentOptionIndex: 0
+                    creationDate: string
+                    updateDate: string
+                    updateOperatorExternalId: string
+                    updateTraceId: string
+                    installments:
+                      - installmentId: 0
+                        paymentOptionId: 0
+                        status: TO_SYNC
+                        syncStatus:
+                          syncStatusFrom: TO_SYNC
+                          syncStatusTo: TO_SYNC
+                          syncError: string
+                        iupdPagopa: string
+                        generateNotice: true
+                        iud: string
+                        iuv: string
+                        iur: string
+                        iuf: string
+                        nav: string
+                        iun: string
+                        dueDate: string
+                        switchToExpired: true
+                        notificationFeeCents: 0
+                        amountCents: 0
+                        remittanceInformation: string
+                        balance: string
+                        legacyPaymentMetadata: string
+                        debtor:
+                          entityType: F
+                          fiscalCode: string
+                          fullName: string
+                          address: string
+                          civic: string
+                          postalCode: string
+                          location: string
+                          province: string
+                          nation: string
+                          email: string
+                        transfers:
+                          - transferId: 0
+                            installmentId: 0
+                            orgFiscalCode: string
+                            orgName: string
+                            amountCents: 0
+                            remittanceInformation: string
+                            stampType: string
+                            stampHashDocument: string
+                            stampProvincialResidence: string
+                            iban: string
+                            postalIban: string
+                            category: string
+                            transferIndex: 0
+                            creationDate: string
+                            updateDate: string
+                            updateOperatorExternalId: string
+                            updateTraceId: string
+                            mbdAttachment: string
+                        notificationDate: string
+                        ingestionFlowFileId: 0
+                        ingestionFlowFileLineNumber: 0
+                        ingestionFlowFileAction: I
+                        sourceFlowName: string
+                        receiptId: 0
+                        creationDate: string
+                        updateDate: string
+                        updateOperatorExternalId: string
+                        updateTraceId: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/printpaymentnotice/{iuv}':
+    get:
+      tags:
+        - PrintPaymentNotice
+      summary: Print payment notice as PDF
+      description: Print payment notice as PDF
+      operationId: generateNotice
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: iuv
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              examples:
+                default:
+                  value: 
+        '400':
+          description: Invalid request
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              examples:
+                default:
+                  value: 
+        '404':
+          description: Notification not found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              examples:
+                default:
+                  value: 
+        '500':
+          description: Internal server error
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              examples:
+                default:
+                  value: 
+  '/organization/{orgFiscalCode}/payment/{idType}/{id}':
+    get:
+      tags:
+        - Payment
+      summary: request processing status of payment operation
+      description: 'Service to request the processing status of payment operation and the url to download output files (where applicable, based on processing status and export type). '
+      operationId: paymentStatus
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: idType
+          in: path
+          description: the type of identifier used to identify the payment operation
+          required: true
+          schema:
+            $ref: '#/components/schemas/QueryPaymentStatusType'
+        - name: id
+          in: path
+          description: the identifier used to identify the payment
+          required: true
+          schema:
+            type: string
+        - name: withReceiptBytes
+          in: query
+          description: 'if true, the response will contain the receipt bytes'
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentStatusResponseDTO'
+              example:
+                paymentId: string
+                status: TO_SYNC
+                receipt:
+                  paymentReceiptId: string
+                  noticeNumber: string
+                  paymentNote: string
+                  orgFiscalCode: string
+                  outcome: string
+                  creditorReferenceId: string
+                  paymentAmountCents: 0
+                  description: string
+                  companyName: string
+                  officeName: string
+                  idPsp: string
+                  pspFiscalCode: string
+                  pspPartitaIva: string
+                  pspCompanyName: string
+                  idChannel: string
+                  channelDescription: string
+                  paymentMethod: string
+                  feeCents: 0
+                  paymentDateTime: string
+                  applicationDate: string
+                  transferDate: string
+                  standin: true
+                  debtor:
+                    entityType: F
+                    fiscalCode: string
+                    fullName: string
+                    address: string
+                    civic: string
+                    postalCode: string
+                    location: string
+                    province: string
+                    nation: string
+                    email: string
+                  payer:
+                    entityType: F
+                    fiscalCode: string
+                    fullName: string
+                    address: string
+                    civic: string
+                    postalCode: string
+                    location: string
+                    province: string
+                    nation: string
+                    email: string
+                  transfers:
+                    - transferIndex: 0
+                      amountCents: 0
+                      orgFiscalCode: string
+                      orgName: string
+                      mbdAttachment: string
+                      iban: string
+                      remittanceInformation: string
+                      category: string
+                      metadata: { }
+                  metadata: { }
+                receiptBytes: string
+                lastUpdateDateTime: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/payment/notice/{nav}':
+    get:
+      tags:
+        - Payment
+      summary: handle the payment of an already existing payment notice
+      description: 'Service to request the start of online payment of a payment notice, or alternatively the download of notice as PDF file; in input accepts the notice number, and if the notice is payable, returns the url to trigger the payment operation and the url to download the PDF notice file; if the notice is not payable, returns the reason of error. '
+      operationId: requestNoticePayment
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: nav
+          in: path
+          description: the notice number of the notice to pay
+          required: true
+          schema:
+            pattern: '^\d{18}$'
+            type: string
+        - name: callbackUrl
+          in: query
+          description: 'If the nav is payable, this parameter is used to specify the url to redirect the navigation flow to, after completing the payment operation. If not set, a generic PU page will be used. The parameters paymentId and outcome (OK/KO) will be added to query string of url. '
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+              example:
+                triggerPaymentUrl: string
+                downloadNoticeUrl: string
+                paymentId: string
+                outcome: OK
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/import/{importId}':
+    get:
+      tags:
+        - Import
+      summary: request processing status of massive import operation
+      description: 'Service to request the processing status of massive import operation and the url to download output files (where applicable, based on processing status and import type). '
+      operationId: massiveImportStatus
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: importId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportStatusResponseDTO'
+              example:
+                importId: 0
+                status: UPLOADED
+                lastUpdateDateTime: string
+                downloadUrls:
+                  - code: NOT_FOUND
+                    url: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/export/{exportId}':
+    get:
+      tags:
+        - Export
+      summary: request processing status of export operation
+      description: 'Service to request the processing status of export operation and the url to download output files (where applicable, based on processing status and export type). '
+      operationId: massiveExportStatus
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: exportId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportStatusResponseDTO'
+              example:
+                exportId: 0
+                status: REQUESTED
+                downloadUrl:
+                  code: NOT_FOUND
+                  url: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/assessment/payment-reporting':
+    get:
+      tags:
+        - Assessment
+      summary: retrieve the assessment data by payment reporting unique identifier
+      description: 'Service to retrieve the assessment data given the payment reporting id (IUF). '
+      operationId: getAssessmentByPaymentReporting
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: iuf
+          in: query
+          description: payment reporting unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAssessmentResponseDTO'
+              example:
+                balances:
+                  - office: string
+                    debtPositionTypeOrgs:
+                      - debtPositionTypeOrgCode: string
+                        sections:
+                          - sectionCode: string
+                            assessments:
+                              - assessmentCode: string
+                                amountCents: 0
+  '/organization/{orgFiscalCode}/assessment/bill':
+    get:
+      tags:
+        - Assessment
+      summary: retrieve the assessment data by bill data
+      description: 'Service to retrieve the assessment data given the reporting id (IUF) or invoice data. '
+      operationId: getAssessmentByBill
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+        - name: billYear
+          in: query
+          description: the year of the bill to retrieve the assessment data for
+          required: true
+          schema:
+            pattern: '^\d{4}$'
+            type: string
+        - name: billNumber
+          in: query
+          description: the bill code to retrieve the assessment data for
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAssessmentResponseDTO'
+              example:
+                balances:
+                  - office: string
+                    debtPositionTypeOrgs:
+                      - debtPositionTypeOrgCode: string
+                        sections:
+                          - sectionCode: string
+                            assessments:
+                              - assessmentCode: string
+                                amountCents: 0
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/organization/{orgFiscalCode}/send-notification/{sendNotificationId}/legal-facts':
+    get:
+      tags:
+        - SendNotification
+      summary: get send legal fact list
+      description: get send legal fact list
+      operationId: getLegalFacts
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalFactListElementDTO'
+              example:
+                - taxId: string
+                  iun: string
+                  legalFactId:
+                    key: string
+                    category: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalFactListElementDTO'
+              example:
+                - taxId: string
+                  iun: string
+                  legalFactId:
+                    key: string
+                    category: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalFactListElementDTO'
+              example:
+                - taxId: string
+                  iun: string
+                  legalFactId:
+                    key: string
+                    category: string
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalFactListElementDTO'
+              example:
+                - taxId: string
+                  iun: string
+                  legalFactId:
+                    key: string
+                    category: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LegalFactListElementDTO'
+              example:
+                - taxId: string
+                  iun: string
+                  legalFactId:
+                    key: string
+                    category: string
+  '/organization/{orgFiscalCode}/send-notification/{sendNotificationId}/legal-facts/{legalFactId}':
+    get:
+      tags:
+        - SendNotification
+      summary: get send legal fact download metadata
+      description: get send legal fact metadata for downloading document content
+      operationId: getLegalFactDownloadMetadata
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sendNotificationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: legalFactId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+              example:
+                filename: string
+                contentLength: 0
+                url: string
+                retryAfter: 0
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+              example:
+                filename: string
+                contentLength: 0
+                url: string
+                retryAfter: 0
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+              example:
+                filename: string
+                contentLength: 0
+                url: string
+                retryAfter: 0
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+              example:
+                filename: string
+                contentLength: 0
+                url: string
+                retryAfter: 0
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LegalFactDownloadMetadataDTO'
+              example:
+                filename: string
+                contentLength: 0
+                url: string
+                retryAfter: 0
+  '/organization/{orgFiscalCode}/checkout':
+    post:
+      tags:
+        - Checkout
+      summary: checkout
+      operationId: checkout
+      parameters:
+        - name: orgFiscalCode
+          in: path
+          description: the fiscal code of the organization
+          required: true
+          schema:
+            pattern: '^\d{11}$'
+            type: string
+      responses:
+        '301':
+          description: Moved Permanently
+          headers:
+            Location:
+              description: Checkout URL
+              schema:
+                type: string
+                format: url
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '500':
+          description: Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/debtor/{debtorFiscalCode}/payment/history':
+    get:
+      tags:
+        - DebtorQueryPayment
+      summary: retrieve payment history for a debtor
+      description: "Service to retrieve payment history (paid debt positions) for a specific debtor\nwithin a optional date range (default from today to the day after),\noptionally filtered by organization IPA code.\n"
+      operationId: getPaymentHistory
+      parameters:
+        - name: debtorFiscalCode
+          in: path
+          description: the fiscal code of the debtor
+          required: true
+          schema:
+            type: string
+        - name: debtorEntityType
+          in: query
+          description: the entity type of the debtor
+          schema:
+            $ref: '#/components/schemas/PersonEntityType'
+        - name: dateFrom
+          in: query
+          description: start date for payment history (ISO 8601 format)
+          schema:
+            type: string
+            format: date-time
+        - name: dateTo
+          in: query
+          description: end date for payment history (ISO 8601 format)
+          schema:
+            type: string
+            format: date-time
+        - name: ipaCode
+          in: query
+          description: organization IPA code to filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentHistoryResponseDTO'
+              example:
+                dateTo: string
+                payments:
+                  - ipaCode: string
+                    orgName: string
+                    receiptDownloadUrl: string
+                    receipt:
+                      paymentReceiptId: string
+                      noticeNumber: string
+                      paymentNote: string
+                      orgFiscalCode: string
+                      outcome: string
+                      creditorReferenceId: string
+                      paymentAmountCents: 0
+                      description: string
+                      companyName: string
+                      officeName: string
+                      idPsp: string
+                      pspFiscalCode: string
+                      pspPartitaIva: string
+                      pspCompanyName: string
+                      idChannel: string
+                      channelDescription: string
+                      paymentMethod: string
+                      feeCents: 0
+                      paymentDateTime: string
+                      applicationDate: string
+                      transferDate: string
+                      standin: true
+                      debtor:
+                        entityType: F
+                        fiscalCode: string
+                        fullName: string
+                        address: string
+                        civic: string
+                        postalCode: string
+                        location: string
+                        province: string
+                        nation: string
+                        email: string
+                      payer:
+                        entityType: F
+                        fiscalCode: string
+                        fullName: string
+                        address: string
+                        civic: string
+                        postalCode: string
+                        location: string
+                        province: string
+                        nation: string
+                        email: string
+                      transfers:
+                        - transferIndex: 0
+                          amountCents: 0
+                          orgFiscalCode: string
+                          orgName: string
+                          mbdAttachment: string
+                          iban: string
+                          remittanceInformation: string
+                          category: string
+                          metadata: { }
+                      metadata: { }
+                    receiptBytes: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+  '/debtor/{debtorFiscalCode}/payment/unpaid':
+    get:
+      tags:
+        - DebtorQueryPayment
+      summary: retrieve unpaid debt positions for a debtor
+      description: "Service to retrieve unpaid debt positions for a specific debtor,\noptionally filtered by organization IPA code.\n"
+      operationId: getUnpaidDebtPositions
+      parameters:
+        - name: debtorFiscalCode
+          in: path
+          description: the fiscal code of the debtor
+          required: true
+          schema:
+            type: string
+        - name: debtorEntityType
+          in: query
+          description: the entity type of the debtor
+          schema:
+            $ref: '#/components/schemas/PersonEntityType'
+        - name: ipaCode
+          in: query
+          description: organization IPA code to filter results
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnpaidDebtPositionsResponseDTO'
+              example:
+                debtPositions:
+                  - ipaCode: string
+                    orgName: string
+                    paymentTriggerUrl: string
+                    unpaidDebtPosition:
+                      debtPositionTypeOrgCode: string
+                      iud: string
+                      notificationFeeCents: 0
+                      totalAmountCents: 0
+                      description: string
+                      balance: string
+                      debtor:
+                        entityType: F
+                        fiscalCode: string
+                        fullName: string
+                        address: string
+                        civic: string
+                        postalCode: string
+                        location: string
+                        province: string
+                        nation: string
+                        email: string
+                      transfers:
+                        - transferId: 0
+                          installmentId: 0
+                          orgFiscalCode: string
+                          orgName: string
+                          amountCents: 0
+                          remittanceInformation: string
+                          stampType: string
+                          stampHashDocument: string
+                          stampProvincialResidence: string
+                          iban: string
+                          postalIban: string
+                          category: string
+                          transferIndex: 0
+                          creationDate: string
+                          updateDate: string
+                          updateOperatorExternalId: string
+                          updateTraceId: string
+                          mbdAttachment: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PuSilErrorDTO'
+              example:
+                code: NOT_FOUND
+                message: string
+components:
+  schemas:
+    Action:
+      enum:
+        - I
+        - M
+        - A
+      type: string
+    DebtPositionDTO:
+      required:
+        - debtPositionOrigin
+        - debtPositionTypeOrgId
+        - flagPuPagoPaPayment
+        - organizationId
+        - paymentOptions
+      type: object
+      properties:
+        debtPositionId:
+          type: integer
+          format: int64
+        iupdOrg:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/DebtPositionStatus'
+        debtPositionOrigin:
+          $ref: '#/components/schemas/DebtPositionOrigin'
+        organizationId:
+          type: integer
+          format: int64
+        debtPositionTypeOrgId:
+          type: integer
+          format: int64
+        validityDate:
+          type: string
+          format: date
+        flagIuvVolatile:
+          type: boolean
+        multiDebtor:
+          type: boolean
+        flagPuPagoPaPayment:
+          type: boolean
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        updateOperatorExternalId:
+          type: string
+        updateTraceId:
+          type: string
+        paymentOptions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentOptionDTO'
+    DebtPositionOrigin:
+      enum:
+        - ORDINARY
+        - ORDINARY_SIL
+        - SPONTANEOUS
+        - SPONTANEOUS_SIL
+        - SPONTANEOUS_MIXED
+        - SECONDARY_ORG
+        - RECEIPT_FILE
+        - RECEIPT_PAGOPA
+        - REPORTING_PAGOPA
+      type: string
+    DebtPositionStatus:
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - EXPIRED
+        - UNPAID
+        - DRAFT
+      type: string
+    InstallmentDTO:
+      required:
+        - amountCents
+        - debtor
+        - remittanceInformation
+      type: object
+      properties:
+        installmentId:
+          type: integer
+          format: int64
+        paymentOptionId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/InstallmentStatus'
+        syncStatus:
+          $ref: '#/components/schemas/InstallmentSyncStatus'
+        iupdPagopa:
+          type: string
+        generateNotice:
+          type: boolean
+        iud:
+          type: string
+        iuv:
+          type: string
+        iur:
+          type: string
+        iuf:
+          type: string
+        nav:
+          type: string
+        iun:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        switchToExpired:
+          type: boolean
+        notificationFeeCents:
+          type: integer
+          format: int64
+        amountCents:
+          type: integer
+          format: int64
+        remittanceInformation:
+          type: string
+        balance:
+          type: string
+        legacyPaymentMetadata:
+          type: string
+        debtor:
+          $ref: '#/components/schemas/PersonDTO'
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferDTO'
+        notificationDate:
+          type: string
+          format: date-time
+        ingestionFlowFileId:
+          type: integer
+          format: int64
+        ingestionFlowFileLineNumber:
+          type: integer
+          format: int64
+        ingestionFlowFileAction:
+          $ref: '#/components/schemas/Action'
+        sourceFlowName:
+          type: string
+        receiptId:
+          type: integer
+          format: int64
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        updateOperatorExternalId:
+          type: string
+        updateTraceId:
+          type: string
+    InstallmentStatus:
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - UNPAYABLE
+        - DRAFT
+      type: string
+    InstallmentSyncStatus:
+      required:
+        - syncStatusFrom
+        - syncStatusTo
+      type: object
+      properties:
+        syncStatusFrom:
+          $ref: '#/components/schemas/InstallmentStatus'
+        syncStatusTo:
+          $ref: '#/components/schemas/InstallmentStatus'
+        syncError:
+          type: string
+    PaymentOptionDTO:
+      required:
+        - installments
+        - paymentOptionType
+        - totalAmountCents
+      type: object
+      properties:
+        paymentOptionId:
+          type: integer
+          format: int64
+        debtPositionId:
+          type: integer
+          format: int64
+        totalAmountCents:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/PaymentOptionStatus'
+        description:
+          type: string
+        paymentOptionType:
+          $ref: '#/components/schemas/PaymentOptionTypeEnum'
+        paymentOptionIndex:
+          type: integer
+          format: int32
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        updateOperatorExternalId:
+          type: string
+        updateTraceId:
+          type: string
+        installments:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstallmentDTO'
+    PaymentOptionStatus:
+      enum:
+        - TO_SYNC
+        - REPORTED
+        - PAID
+        - PARTIALLY_PAID
+        - CANCELLED
+        - INVALID
+        - EXPIRED
+        - UNPAID
+        - UNPAYABLE
+        - DRAFT
+      type: string
+    PaymentOptionTypeEnum:
+      enum:
+        - SINGLE_INSTALLMENT
+        - REDUCED_SINGLE_INSTALLMENT
+        - INSTALLMENTS
+        - DOWN_PAYMENT
+      type: string
+    PersonDTO:
+      required:
+        - entityType
+        - fiscalCode
+        - fullName
+      type: object
+      properties:
+        entityType:
+          $ref: '#/components/schemas/PersonEntityType'
+        fiscalCode:
+          type: string
+        fullName:
+          type: string
+        address:
+          type: string
+        civic:
+          type: string
+        postalCode:
+          type: string
+        location:
+          type: string
+        province:
+          type: string
+        nation:
+          type: string
+        email:
+          type: string
+    PersonEntityType:
+      enum:
+        - F
+        - G
+      type: string
+    TransferDTO:
+      required:
+        - amountCents
+        - category
+        - orgFiscalCode
+        - orgName
+        - remittanceInformation
+        - transferIndex
+      type: object
+      properties:
+        transferId:
+          type: integer
+          format: int64
+        installmentId:
+          type: integer
+          format: int64
+        orgFiscalCode:
+          type: string
+        orgName:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+        remittanceInformation:
+          type: string
+        stampType:
+          type: string
+        stampHashDocument:
+          type: string
+        stampProvincialResidence:
+          type: string
+        iban:
+          type: string
+        postalIban:
+          type: string
+        category:
+          type: string
+        transferIndex:
+          type: integer
+          format: int32
+        creationDate:
+          type: string
+          format: date-time
+        updateDate:
+          type: string
+          format: date-time
+        updateOperatorExternalId:
+          type: string
+        updateTraceId:
+          type: string
+        mbdAttachment:
+          type: string
+    CodeEnum:
+      enum:
+        - NOT_FOUND
+        - BAD_REQUEST
+        - INVALID_FILE
+        - FILE_UPLOAD_ERROR
+        - CONFLICT
+        - UNAUTHORIZED
+        - GENERIC_ERROR
+      type: string
+    PuSilErrorDTO:
+      required:
+        - code
+        - message
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/CodeEnum'
+        message:
+          type: string
+    ManageDebtPositionDTO:
+      required:
+        - installments
+      type: object
+      properties:
+        debtPositionDescription:
+          type: string
+        validityDate:
+          type: string
+          format: date
+        paymentOptionDescription:
+          type: string
+        installments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManageInstallmentDTO'
+    ManageInstallmentDTO:
+      required:
+        - action
+        - installment
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/Action'
+        installment:
+          $ref: '#/components/schemas/InstallmentDTO'
+    CreateNotificationResponse:
+      type: object
+      properties:
+        sendNotificationId:
+          type: string
+        preloadUrl:
+          type: string
+        status:
+          type: string
+    Address:
+      required:
+        - address
+        - municipality
+      type: object
+      properties:
+        address:
+          type: string
+        zip:
+          type: string
+        municipality:
+          type: string
+        province:
+          type: string
+    Attachment:
+      type: object
+      properties:
+        digest:
+          type: string
+        contentType:
+          type: string
+        fileName:
+          type: string
+    CreateNotificationRequest:
+      required:
+        - notificationFeePolicy
+        - organizationId
+        - paProtocolNumber
+        - physicalCommunicationType
+        - recipients
+      type: object
+      properties:
+        organizationId:
+          type: integer
+          format: int64
+        paProtocolNumber:
+          type: string
+        recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Recipient'
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Document'
+        notificationFeePolicy:
+          $ref: '#/components/schemas/NotificationFeePolicyEnum'
+        physicalCommunicationType:
+          $ref: '#/components/schemas/PhysicalCommunicationTypeEnum'
+        senderDenomination:
+          type: string
+        senderTaxId:
+          type: string
+        amount:
+          type: number
+        paymentExpirationDate:
+          type: string
+          format: date
+        taxonomyCode:
+          type: string
+        paFee:
+          maximum: 100.0
+          minimum: 0.0
+          type: integer
+          format: int32
+        vat:
+          maximum: 100.0
+          minimum: 0.0
+          type: integer
+          format: int32
+        pagoPaIntMode:
+          $ref: '#/components/schemas/PagoPaIntModeEnum'
+    Document:
+      type: object
+      properties:
+        digest:
+          type: string
+        contentType:
+          type: string
+        fileName:
+          type: string
+    F24Payment:
+      required:
+        - applyCost
+        - metadataAttachment
+        - title
+      type: object
+      properties:
+        title:
+          type: string
+        applyCost:
+          type: boolean
+        metadataAttachment:
+          $ref: '#/components/schemas/Attachment'
+    NotificationDigitalAddress:
+      required:
+        - address
+        - type
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        address:
+          maxLength: 320
+          minLength: 0
+          pattern: '^(?:[a-zA-Z0-9!#$%&''*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&''*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\[(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])$'
+          type: string
+    NotificationFeePolicyEnum:
+      enum:
+        - FLAT_RATE
+        - DELIVERY_MODE
+      type: string
+    PagoPa:
+      required:
+        - applyCost
+        - creditorTaxId
+        - noticeCode
+      type: object
+      properties:
+        noticeCode:
+          type: string
+        creditorTaxId:
+          type: string
+        applyCost:
+          type: boolean
+        attachment:
+          $ref: '#/components/schemas/Attachment'
+    PagoPaIntModeEnum:
+      enum:
+        - SYNC
+        - ASYNC
+        - NONE
+      type: string
+    Payment:
+      type: object
+      properties:
+        pagoPa:
+          $ref: '#/components/schemas/PagoPa'
+        f24:
+          $ref: '#/components/schemas/F24Payment'
+    PhysicalCommunicationTypeEnum:
+      enum:
+        - AR_REGISTERED_LETTER
+        - REGISTERED_LETTER_890
+      type: string
+    Recipient:
+      required:
+        - denomination
+        - physicalAddress
+        - recipientType
+        - taxId
+      type: object
+      properties:
+        recipientType:
+          $ref: '#/components/schemas/RecipientTypeEnum'
+        taxId:
+          type: string
+        denomination:
+          type: string
+        physicalAddress:
+          $ref: '#/components/schemas/Address'
+        digitalDomicile:
+          $ref: '#/components/schemas/NotificationDigitalAddress'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    RecipientTypeEnum:
+      enum:
+        - PF
+        - PG
+      type: string
+    TypeEnum:
+      enum:
+        - PEC
+      type: string
+    OutcomeEnum:
+      enum:
+        - OK
+        - ALREADY_PAID
+        - NOT_PAYABLE
+        - NOT_FOUND
+      type: string
+    PaymentResponse:
+      type: object
+      properties:
+        triggerPaymentUrl:
+          type: string
+          description: the url to trigger the payment operation
+        downloadNoticeUrl:
+          type: string
+          description: the url to download the payment notice as pdf file (not applicable to immediate payments)
+        paymentId:
+          type: string
+          description: id to query payment operation status
+        outcome:
+          $ref: '#/components/schemas/OutcomeEnum'
+    InstantPaymentRequest:
+      required:
+        - payments
+      type: object
+      properties:
+        payments:
+          maxItems: 5
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentDTO'
+          description: the payments data
+        callbackUrl:
+          type: string
+          description: 'the url to redirect the navigation flow to, after completing the payment operation. If not set, a generic PU page will be used. The parameters paymentId and outcome (OK/KO) will be added to query string of url. '
+    PaymentDTO:
+      required:
+        - debtPositionTypeOrgCode
+        - debtor
+        - totalAmountCents
+        - transfers
+      type: object
+      properties:
+        debtPositionTypeOrgCode:
+          type: string
+        iud:
+          type: string
+        notificationFeeCents:
+          type: integer
+          format: int64
+        totalAmountCents:
+          type: integer
+          format: int64
+        description:
+          type: string
+        balance:
+          type: string
+        debtor:
+          $ref: '#/components/schemas/PersonDTO'
+        transfers:
+          maxItems: 5
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/TransferDTO'
+    ImportFileResponseDTO:
+      required:
+        - importId
+        - uploadUrl
+      type: object
+      properties:
+        importId:
+          type: string
+        uploadUrl:
+          type: string
+          description: 'The url to upload the file to, using a POST request with the file as body.'
+    ImportFileRequestDTO:
+      required:
+        - importFileType
+      type: object
+      properties:
+        importFileType:
+          $ref: '#/components/schemas/IngestionFlowFileTypeEnum'
+    IngestionFlowFileTypeEnum:
+      enum:
+        - RECEIPT
+        - RECEIPT_PAGOPA
+        - PAYMENTS_REPORTING
+        - PAYMENTS_REPORTING_PAGOPA
+        - TREASURY_OPI
+        - TREASURY_CSV
+        - TREASURY_XLS
+        - TREASURY_POSTE
+        - TREASURY_CSV_COMPLETE
+        - DP_INSTALLMENTS
+        - PAYMENT_NOTIFICATION
+        - ORGANIZATIONS
+        - ORGANIZATIONS_SIL_SERVICE
+        - DEBT_POSITIONS_TYPE
+        - DEBT_POSITIONS_TYPE_ORG
+        - DEBT_POSITIONS_TYPE_ORG_OPERATORS
+        - ASSESSMENTS
+        - ASSESSMENTS_REGISTRY
+        - SEND_NOTIFICATION
+      type: string
+    ExportFileResponseDTO:
+      required:
+        - exportId
+      type: object
+      properties:
+        exportId:
+          type: string
+    OffsetDateTimeIntervalFilter:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+    PaidExportFileFilter:
+      type: object
+      properties:
+        paymentDateTime:
+          $ref: '#/components/schemas/OffsetDateTimeIntervalFilter'
+        installmentUpdateDateTime:
+          $ref: '#/components/schemas/OffsetDateTimeIntervalFilter'
+        debtPositionTypeOrgCode:
+          type: string
+    PaidExportRequestDTO:
+      required:
+        - exportFilters
+        - fileVersion
+        - orgFiscalCode
+      type: object
+      properties:
+        orgFiscalCode:
+          type: string
+        fileVersion:
+          type: string
+        exportFilters:
+          $ref: '#/components/schemas/PaidExportFileFilter'
+    ClassificationsExportFileFilter:
+      type: object
+      properties:
+        iuf:
+          type: string
+        iud:
+          type: string
+        iuv:
+          type: array
+          items:
+            type: string
+        iur:
+          type: array
+          items:
+            type: string
+        label:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/LabelEnum'
+        lastClassificationDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        payDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        paymentDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        regulationDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        billDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        regionValueDate:
+          $ref: '#/components/schemas/LocalDateIntervalFilter'
+        regulationUniqueIdentifier:
+          type: string
+        accountRegistryCode:
+          type: string
+        billAmountCents:
+          type: integer
+          format: int64
+        remittanceInformation:
+          type: string
+        pspCompanyName:
+          type: string
+        pspLastName:
+          type: string
+        debtPositionTypeOrgCodes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+    ClassificationsExportRequestDTO:
+      required:
+        - exportFilters
+        - fileVersion
+        - orgFiscalCode
+      type: object
+      properties:
+        orgFiscalCode:
+          type: string
+        fileVersion:
+          type: string
+        exportFilters:
+          $ref: '#/components/schemas/ClassificationsExportFileFilter'
+    LabelEnum:
+      enum:
+        - DOPPI
+        - RT_NO_IUF
+        - RT_NO_IUD
+        - IUV_NO_RT
+        - TES_NO_IUF_OR_IUV
+        - IUF_NO_TES
+        - IUD_RT_IUF
+        - RT_IUF
+        - RT_TES
+        - IUD_RT_IUF_TES
+        - RT_IUF_TES
+        - IUF_TES_DIV_IMP
+        - IUD_NO_RT
+        - TES_NO_MATCH
+        - UNKNOWN
+      type: string
+    LocalDateIntervalFilter:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+    NotificationStatus:
+      enum:
+        - WAITING_FILE
+        - SENDING
+        - REGISTERED
+        - UPLOADED
+        - COMPLETE
+        - ACCEPTED
+        - ERROR
+      type: string
+    SendNotificationDTO:
+      required:
+        - organizationId
+        - payments
+        - sendNotificationId
+        - status
+      type: object
+      properties:
+        sendNotificationId:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        iun:
+          type: string
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/SendNotificationPaymentsDTO'
+        status:
+          $ref: '#/components/schemas/NotificationStatus'
+        errors:
+          type: array
+          items:
+            type: string
+    SendNotificationPaymentsDTO:
+      required:
+        - debtPositionId
+        - navList
+      type: object
+      properties:
+        debtPositionId:
+          type: integer
+          format: int64
+        navList:
+          type: array
+          items:
+            type: string
+        notificationDate:
+          type: string
+          format: date-time
+    LegalFactIdDTO:
+      required:
+        - category
+        - key
+      type: object
+      properties:
+        key:
+          type: string
+        category:
+          type: string
+    LegalFactListElementDTO:
+      required:
+        - iun
+        - legalFactId
+      type: object
+      properties:
+        taxId:
+          type: string
+        iun:
+          type: string
+        legalFactId:
+          $ref: '#/components/schemas/LegalFactIdDTO'
+    LegalFactDownloadMetadataDTO:
+      required:
+        - contentLength
+        - filename
+      type: object
+      properties:
+        filename:
+          type: string
+        contentLength:
+          type: number
+        url:
+          type: string
+        retryAfter:
+          type: number
+    PaymentStatusResponseDTO:
+      required:
+        - paymentId
+        - status
+      type: object
+      properties:
+        paymentId:
+          type: string
+        status:
+          $ref: '#/components/schemas/InstallmentStatus'
+        receipt:
+          $ref: '#/components/schemas/ReceiptWithAdditionalNodeDataDTO'
+        receiptBytes:
+          type: string
+          format: byte
+        lastUpdateDateTime:
+          type: string
+          format: date-time
+    ReceiptTransferDTO:
+      required:
+        - amountCents
+        - category
+        - orgFiscalCode
+        - remittanceInformation
+        - transferIndex
+      type: object
+      properties:
+        transferIndex:
+          type: integer
+          format: int32
+        amountCents:
+          type: integer
+          format: int64
+        orgFiscalCode:
+          type: string
+        orgName:
+          type: string
+        mbdAttachment:
+          type: string
+          format: byte
+        iban:
+          type: string
+        remittanceInformation:
+          type: string
+        category:
+          type: string
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+    ReceiptWithAdditionalNodeDataDTO:
+      required:
+        - channelDescription
+        - companyName
+        - creditorReferenceId
+        - debtor
+        - description
+        - idChannel
+        - idPsp
+        - noticeNumber
+        - orgFiscalCode
+        - outcome
+        - paymentAmountCents
+        - paymentReceiptId
+        - pspCompanyName
+        - transfers
+      type: object
+      properties:
+        paymentReceiptId:
+          type: string
+        noticeNumber:
+          type: string
+        paymentNote:
+          type: string
+        orgFiscalCode:
+          type: string
+        outcome:
+          type: string
+        creditorReferenceId:
+          type: string
+        paymentAmountCents:
+          type: integer
+          format: int64
+        description:
+          type: string
+        companyName:
+          type: string
+        officeName:
+          type: string
+        idPsp:
+          type: string
+        pspFiscalCode:
+          type: string
+        pspPartitaIva:
+          type: string
+        pspCompanyName:
+          type: string
+        idChannel:
+          type: string
+        channelDescription:
+          type: string
+        paymentMethod:
+          type: string
+        feeCents:
+          type: integer
+          format: int64
+        paymentDateTime:
+          type: string
+          format: date-time
+        applicationDate:
+          type: string
+          format: date-time
+        transferDate:
+          type: string
+          format: date-time
+        standin:
+          type: boolean
+        debtor:
+          $ref: '#/components/schemas/PersonDTO'
+        payer:
+          $ref: '#/components/schemas/PersonDTO'
+        transfers:
+          maxItems: 2147483647
+          minItems: 1
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptTransferDTO'
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+    QueryPaymentStatusType:
+      enum:
+        - INSTALLMENT_ID
+        - NOTICE_NUMBER
+        - IUD
+      type: string
+    DownloadUrl:
+      required:
+        - url
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/CodeEnum'
+        url:
+          type: string
+    ImportStatusResponseDTO:
+      required:
+        - importId
+        - status
+      type: object
+      properties:
+        importId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/IngestionFlowFileStatus'
+        lastUpdateDateTime:
+          type: string
+          format: date-time
+        downloadUrls:
+          type: array
+          items:
+            $ref: '#/components/schemas/DownloadUrl'
+    IngestionFlowFileStatus:
+      enum:
+        - UPLOADED
+        - PROCESSING
+        - COMPLETED
+        - ERROR
+        - WAITING_FILE
+      type: string
+    ExportStatusResponseDTO:
+      required:
+        - exportId
+        - status
+      type: object
+      properties:
+        exportId:
+          type: integer
+          format: int64
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        downloadUrl:
+          $ref: '#/components/schemas/DownloadUrl'
+    StatusEnum:
+      enum:
+        - REQUESTED
+        - PROCESSING
+        - COMPLETED
+        - EXPIRED
+        - ERROR
+        - COMPLETED_NO_DATA_FOUND
+      type: string
+    AssessmentDTO:
+      required:
+        - amountCents
+        - assessmentCode
+      type: object
+      properties:
+        assessmentCode:
+          type: string
+        amountCents:
+          type: integer
+          format: int64
+    BalanceDTO:
+      required:
+        - debtPositionTypeOrgs
+        - office
+      type: object
+      properties:
+        office:
+          type: string
+        debtPositionTypeOrgs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DebtPositionTypeOrgDTO'
+    DebtPositionTypeOrgDTO:
+      required:
+        - debtPositionTypeOrgCode
+        - sections
+      type: object
+      properties:
+        debtPositionTypeOrgCode:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/SectionDTO'
+    GetAssessmentResponseDTO:
+      type: object
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/BalanceDTO'
+    SectionDTO:
+      required:
+        - assessments
+        - sectionCode
+      type: object
+      properties:
+        sectionCode:
+          type: string
+        assessments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssessmentDTO'
+    PaymentHistoryResponseDTO:
+      required:
+        - dateTo
+        - payments
+      type: object
+      properties:
+        dateTo:
+          type: string
+          format: date-time
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentHistoryDTO'
+    PaymentHistoryDTO:
+      required:
+        - ipaCode
+        - orgName
+        - receiptDownloadUrl
+        - receipt
+        - receiptBytes
+      type: object
+      properties:
+        ipaCode:
+          type: string
+        orgName:
+          type: string
+        receiptDownloadUrl:
+          type: string
+          description: the url to download the receipt as pdf file
+        receipt:
+          $ref: '#/components/schemas/ReceiptWithAdditionalNodeDataDTO'
+        receiptBytes:
+          type: string
+          format: byte
+    UnpaidDebtPositionsResponseDTO:
+      required:
+        - debtPositions
+      type: object
+      properties:
+        debtPositions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnpaidDebtPositionsDTO'
+    UnpaidDebtPositionsDTO:
+      required:
+        - ipaCode
+        - orgName
+        - paymentTriggerUrl
+        - unpaidDebtPosition
+      type: object
+      properties:
+        ipaCode:
+          type: string
+        orgName:
+          type: string
+        paymentTriggerUrl:
+          type: string
+          description: the url to trigger the payment operation
+        unpaidDebtPosition:
+          $ref: '#/components/schemas/PaymentDTO'
+tags:
+  - name: SendNotification
+    description: the SendNotification API
+  - name: Payment
+    description: the Payment API
+  - name: Assessment
+    description: the Assessment API
+  - name: Export
+    description: the Export API
+  - name: PrintPaymentNotice
+    description: the PrintPaymentNotice API
+  - name: Import
+    description: the Import API
+  - name: DebtPosition
+    description: the DebtPosition API
+  - name: DebtorQueryPayment
+    description: the DebtorQueryPayment API

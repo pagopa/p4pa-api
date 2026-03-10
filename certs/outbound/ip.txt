@@ -1,0 +1,2 @@
+UAT:    72.146.248.64                                outbound.uat.p4pa.pagopa.it
+PROD:   4.232.7.111   4.232.0.244  72.146.64.111     outbound.p4pa.pagopa.it

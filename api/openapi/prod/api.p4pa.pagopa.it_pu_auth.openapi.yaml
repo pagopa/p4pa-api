@@ -1,0 +1,749 @@
+openapi: 3.0.1
+info:
+  title: AUTH API
+  description: Servizio IAM di Piattaforma Unitaria
+  version: '1.0'
+servers:
+  - url: https://api.p4pa.pagopa.it/pu/auth
+paths:
+  /oauth/token:
+    post:
+      tags:
+        - authn
+      summary: postToken
+      operationId: postToken
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: grant_type
+          in: query
+          required: true
+          schema:
+            enum:
+              - urn:ietf:params:oauth:grant-type:token-exchange
+              - client_credentials
+            type: string
+        - name: scope
+          in: query
+          required: true
+          schema:
+            enum:
+              - openid
+            type: string
+        - name: subject_token
+          in: query
+          description: ID Token
+          schema:
+            type: string
+        - name: subject_issuer
+          in: query
+          description: Issuer del subject_token
+          schema:
+            type: string
+        - name: subject_token_type
+          in: query
+          schema:
+            enum:
+              - urn:ietf:params:oauth:token-type:jwt
+            type: string
+        - name: client_secret
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+              example:
+                access_token: string
+                token_type: Bearer
+                expires_in: 0
+        '400':
+          description: Invalid request
+        '401':
+          description: Authentication failed
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Server ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthErrorDTO'
+              example:
+                error: AUTH_GENERIC_ERROR
+                error_description: string
+                traceId: string
+  /oauth/userinfo:
+    get:
+      tags:
+        - authn
+      summary: getUserInfo
+      operationId: getUserInfo
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+              example:
+                userId: string
+                mappedExternalUserId: string
+                fiscalCode: string
+                familyName: string
+                name: string
+                issuer: string
+                organizationAccess: string
+                organizations:
+                  - operatorId: string
+                    organizationId: 0
+                    organizationIpaCode: string
+                    organizationFiscalCode: string
+                    email: string
+                    roles:
+                      - string
+                brokerId: 0
+                brokerFiscalCode: string
+                canManageUsers: true
+                systemUser: true
+                traceId: string
+                _type: string
+        '401':
+          description: Authentication failed
+        '403':
+          description: Forbidden
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Server ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthErrorDTO'
+              example:
+                error: AUTH_GENERIC_ERROR
+                error_description: string
+                traceId: string
+  /oauth/revoke:
+    post:
+      tags:
+        - authn
+      summary: logout
+      operationId: logout
+      parameters:
+        - name: client_id
+          in: query
+          required: true
+          schema:
+            enum:
+              - piattaforma-unitaria
+            type: string
+        - name: token
+          in: query
+          description: Access Token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Invalid request
+        '401':
+          description: Invalid client_id
+  '/oauth/clients/{organizationIpaCode}':
+    get:
+      tags:
+        - authz
+      summary: getClients
+      operationId: getClients
+      parameters:
+        - name: organizationIpaCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientNoSecretDTO'
+              example:
+                - clientId: string
+                  clientName: string
+                  organizationIpaCode: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '412':
+          description: ToS acceptance missing
+        '429':
+          description: Too Many Requests
+    post:
+      tags:
+        - authz
+      summary: registerClient
+      operationId: registerClient
+      parameters:
+        - name: organizationIpaCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientRequest'
+            example:
+              clientName: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTO'
+              example:
+                clientId: string
+                clientName: string
+                organizationIpaCode: string
+                clientSecret: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '409':
+          description: Conflict
+        '429':
+          description: Too Many Requests
+  '/oauth/clients/{organizationIpaCode}/{clientId}':
+    delete:
+      tags:
+        - authz
+      summary: revokeClient
+      operationId: revokeClient
+      parameters:
+        - name: organizationIpaCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: OK
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '412':
+          description: ToS acceptance missing
+        '429':
+          description: Too Many Requests
+    get:
+      tags:
+        - authz
+      summary: getClient
+      operationId: getClient
+      parameters:
+        - name: organizationIpaCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTO'
+              example:
+                clientId: string
+                clientName: string
+                organizationIpaCode: string
+                clientSecret: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '412':
+          description: ToS acceptance missing
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+  /oauth/clients/search:
+    get:
+      tags:
+        - authz
+      summary: getClientsSearch
+      operationId: getClientsSearch
+      parameters:
+        - name: organizationIpaCode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          schema:
+            type: string
+        - name: clientName
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Zero-based page index (0..N)
+          schema:
+            minimum: 0.0
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: The size of the page to be returned
+          schema:
+            minimum: 1.0
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          description: 'Sorting criteria in the format: property,(asc|desc). Default sort order is ascending. Multiple sort criteria are supported.'
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTOPage'
+              example:
+                content:
+                  - clientId: string
+                    clientName: string
+                    organizationIpaCode: string
+                pageNo: 0
+                pageSize: 0
+                totalElements: 0
+                totalPages: 0
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '412':
+          description: ToS acceptance missing
+        '429':
+          description: Too Many Requests
+  '/oauth/clients/{organizationIpaCode}/{clientId}/generate':
+    post:
+      tags:
+        - authz
+      summary: generateClientSecret
+      operationId: generateClientSecret
+      parameters:
+        - name: organizationIpaCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDTO'
+              example:
+                clientId: string
+                clientName: string
+                organizationIpaCode: string
+                clientSecret: string
+        '400':
+          description: Invalid request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '412':
+          description: ToS acceptance missing
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+components:
+  schemas:
+    LimitedTokenRequest:
+      required:
+        - organizationId
+        - app
+        - resource
+      type: object
+      properties:
+        organizationId:
+          type: integer
+          format: int64
+        app:
+          type: string
+        resource:
+          type: string
+        resourceId:
+          type: string
+        expireInSeconds:
+          type: integer
+          format: int64
+        singleUsage:
+          type: boolean
+        sessionData:
+          type: object
+    AccessToken:
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          default: Bearer
+        expires_in:
+          type: integer
+    ClientDTO:
+      required:
+        - clientId
+        - clientName
+        - organizationIpaCode
+        - clientSecret
+      type: object
+      properties:
+        clientId:
+          type: string
+        clientName:
+          type: string
+        organizationIpaCode:
+          type: string
+        clientSecret:
+          type: string
+    ClientNoSecretDTO:
+      required:
+        - clientId
+        - clientName
+        - organizationIpaCode
+      type: object
+      properties:
+        clientId:
+          type: string
+        clientName:
+          type: string
+        organizationIpaCode:
+          type: string
+    CreateClientRequest:
+      required:
+        - clientName
+      type: object
+      properties:
+        clientName:
+          pattern: '^[a-zA-Z0-9-_]*$'
+          type: string
+    UserDTO:
+      required:
+        - externalUserId
+        - firstName
+        - lastName
+        - fiscalCode
+      type: object
+      properties:
+        externalUserId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        fiscalCode:
+          type: string
+    UserInfo:
+      required:
+        - userId
+        - mappedExternalUserId
+        - fiscalCode
+        - familyName
+        - name
+        - email
+        - issuer
+        - organizations
+        - canManageUsers
+        - traceId
+        - _type
+      type: object
+      properties:
+        userId:
+          type: string
+        mappedExternalUserId:
+          type: string
+        fiscalCode:
+          type: string
+        familyName:
+          type: string
+        name:
+          type: string
+        issuer:
+          type: string
+        organizationAccess:
+          type: string
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserOrganizationRoles'
+        brokerId:
+          type: integer
+          format: int64
+        brokerFiscalCode:
+          type: string
+        canManageUsers:
+          type: boolean
+        systemUser:
+          type: boolean
+        traceId:
+          type: string
+        _type:
+          type: string
+      discriminator:
+        propertyName: _type
+        mapping:
+          Limited: '#/components/schemas/UserInfoLimitedScope'
+    UserOrganizationRoles:
+      required:
+        - operatorId
+        - organizationId
+        - organizationIpaCode
+        - organizationFiscalCode
+        - roles
+      type: object
+      properties:
+        operatorId:
+          type: string
+        organizationId:
+          type: integer
+          format: int64
+        organizationIpaCode:
+          type: string
+        organizationFiscalCode:
+          type: string
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    OperatorsPage:
+      required:
+        - content
+        - pageNo
+        - pageSize
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorDTO'
+          description: The list of organization operators
+        pageNo:
+          type: integer
+          description: Number of page
+          format: int32
+        pageSize:
+          type: integer
+          description: Number of elements in the page
+          format: int32
+        totalElements:
+          type: integer
+          description: Number of total elements
+          format: int32
+        totalPages:
+          type: integer
+          description: Number of total pages
+          format: int32
+    OperatorDTO:
+      required:
+        - userId
+        - mappedExternalUserId
+        - userCode
+        - operatorId
+        - roles
+        - organizationIpaCode
+      type: object
+      properties:
+        userId:
+          type: string
+        mappedExternalUserId:
+          type: string
+        userCode:
+          type: string
+        operatorId:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        organizationIpaCode:
+          type: string
+        fiscalCode:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+    CreateOperatorRequest:
+      required:
+        - externalUserId
+        - firstName
+        - lastName
+        - roles
+        - email
+      type: object
+      properties:
+        externalUserId:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        fiscalCode:
+          type: string
+        email:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    AuthErrorDTO:
+      required:
+        - error
+      type: object
+      properties:
+        error:
+          enum:
+            - AUTH_GENERIC_ERROR
+            - AUTH_NOT_FOUND
+            - AUTH_USER_UNAUTHORIZED
+            - invalid_request
+            - invalid_client
+            - invalid_scope
+            - invalid_grant
+            - unsupported_grant_type
+          type: string
+        error_description:
+          type: string
+          x-field-extra-annotation: '@com.fasterxml.jackson.annotation.JsonProperty("error_description")'
+        traceId:
+          type: string
+    ClientDTOPage:
+      required:
+        - content
+        - pageNo
+        - pageSize
+        - totalElements
+        - totalPages
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientNoSecretDTO'
+          description: The list of sil client
+        pageNo:
+          type: integer
+          description: Number of page
+          format: int32
+        pageSize:
+          type: integer
+          description: Number of elements in the page
+          format: int32
+        totalElements:
+          type: integer
+          description: Number of total elements
+          format: int32
+        totalPages:
+          type: integer
+          description: Number of total pages
+          format: int32
+    UserInfoLimitedScope:
+      required:
+        - resource
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/UserInfo'
+      properties:
+        resource:
+          $ref: '#/components/schemas/LimitedScopeResource'
+    LimitedScopeResource:
+      required:
+        - app
+        - organization
+        - resource
+        - resourceId
+        - singleUsage
+      type: object
+      properties:
+        app:
+          type: string
+        organization:
+          $ref: '#/components/schemas/UserOrganizationRoles'
+        resource:
+          type: string
+        resourceId:
+          type: string
+        singleUsage:
+          type: boolean
+        sessionData:
+          type: object
