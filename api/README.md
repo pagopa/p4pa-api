@@ -8,7 +8,7 @@ The APIs exposed through the `api-mtls.*` domain require the mutual TLS authenti
 
 ## OAuth2
 
-The REST APIs which are configured with `bearer` security scheme require a token (see [Token Request](#Token%20request)). 
+The REST APIs which are configured with `bearer` security scheme require a token (see [Token Request](#token-request)). 
 
 The following SOAP APIs require an `Authorization` header with the same bearer token:
 * `Pagamenti Telematici Dovuti Pagati per Ente`
@@ -25,5 +25,5 @@ The token to invoke authenticated requests could be obtained through the `postTo
 
 EG:
 ```bash
-curl --location --request POST 'https://<PU BASE URL>/pu/auth/oauth/token?grant_type=client_credentials&scope=openid&client_id=<CLIENT_ID>&client_secret=<CLIENT_SECRET>' -d ''
+curl --location --request POST 'https://api.<ENV>.p4pa.pagopa.it/pu/auth/oauth/token?grant_type=client_credentials&scope=openid&client_id=<CLIENT_ID>&client_secret=<CLIENT_SECRET>' -d ''
 ```
