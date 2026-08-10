@@ -787,6 +787,7 @@ components:
         - organizationIpaCode
         - organizationFiscalCode
         - roles
+        - orgSubUnitCodes
       properties:
         operatorId:
           type: string
@@ -800,6 +801,10 @@ components:
         email:
           type: string
         roles:
+          type: array
+          items:
+            type: string
+        orgSubUnitCodes:
           type: array
           items:
             type: string
@@ -904,6 +909,8 @@ components:
             - AUTH_NOT_FOUND
             - AUTH_USER_UNAUTHORIZED
             - AUTH_TOO_MANY_REQUESTS
+            - AUTH_CONFLICT
+            - AUTH_FORBIDDEN
             - invalid_request
             - invalid_client
             - invalid_scope
@@ -913,8 +920,24 @@ components:
           type: string
         error_description:
           type: string
-          x-field-extra-annotation: "@com.fasterxml.jackson.annotation.JsonProperty(\"error_description\")"
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ErrorFieldDTO"
         traceId:
+          type: string
+    ErrorFieldDTO:
+      type: object
+      required:
+        - field
+        - error
+        - message
+      properties:
+        field:
+          type: string
+        error:
+          type: string
+        message:
           type: string
     ClientDTOPage:
       type: object

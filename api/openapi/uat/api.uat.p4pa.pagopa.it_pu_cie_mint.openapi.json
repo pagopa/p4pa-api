@@ -26,7 +26,8 @@
           "in" : "query",
           "required" : false,
           "schema" : {
-            "type" : "string"
+            "type" : "string",
+            "nullable" : true
           }
         }, {
           "name" : "completionDateFrom",
@@ -34,7 +35,8 @@
           "required" : false,
           "schema" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           }
         }, {
           "name" : "completionDateTo",
@@ -42,7 +44,8 @@
           "required" : false,
           "schema" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           }
         }, {
           "name" : "paymentDateFrom",
@@ -50,7 +53,8 @@
           "required" : false,
           "schema" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           }
         }, {
           "name" : "paymentDateTo",
@@ -58,7 +62,8 @@
           "required" : false,
           "schema" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           }
         }, {
           "name" : "page",
@@ -66,9 +71,9 @@
           "description" : "Zero-based page index (0..N)",
           "required" : false,
           "schema" : {
+            "minimum" : 0,
             "type" : "integer",
-            "default" : 0,
-            "minimum" : 0
+            "default" : 0
           }
         }, {
           "name" : "size",
@@ -76,9 +81,9 @@
           "description" : "The size of the page to be returned",
           "required" : false,
           "schema" : {
+            "minimum" : 1,
             "type" : "integer",
-            "default" : 20,
-            "minimum" : 1
+            "default" : 20
           }
         }, {
           "name" : "sort",
@@ -108,7 +113,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedPaymentCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -118,7 +123,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedPaymentCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -128,7 +133,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedPaymentCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -147,6 +152,7 @@
         "enum" : [ "UNPAID", "PAID", "BURNED", "REFUNDED" ]
       },
       "PagedPaymentCieDTO" : {
+        "required" : [ "content", "number", "size", "totalElements", "totalPages" ],
         "type" : "object",
         "properties" : {
           "content" : {
@@ -171,10 +177,10 @@
             "type" : "integer",
             "format" : "int64"
           }
-        },
-        "required" : [ "content", "number", "size", "totalElements", "totalPages" ]
+        }
       },
       "PaymentCieDTO" : {
+        "required" : [ "mefAmountCents", "nav", "orgAmountCents", "orgFiscalCode", "orgName", "reasonCode", "reasonDescription", "status" ],
         "type" : "object",
         "properties" : {
           "status" : {
@@ -182,13 +188,15 @@
           },
           "paymentDate" : {
             "type" : "string",
+            "description" : "Payment date and time",
             "format" : "date-time",
-            "description" : "Payment date and time"
+            "nullable" : true
           },
           "completionDate" : {
             "type" : "string",
+            "description" : "Date and time when the payment was consumed for the CIE issuance",
             "format" : "date-time",
-            "description" : "Date and time when the payment was consumed for the CIE issuance"
+            "nullable" : true
           },
           "nav" : {
             "type" : "string",
@@ -212,16 +220,60 @@
           },
           "orgAmountCents" : {
             "type" : "integer",
-            "format" : "int64",
-            "description" : "Amount due to the organization"
+            "description" : "Amount due to the organization",
+            "format" : "int64"
           },
           "mefAmountCents" : {
             "type" : "integer",
-            "format" : "int64",
-            "description" : "Amount due to MEF"
+            "description" : "Amount due to MEF",
+            "format" : "int64"
           }
-        },
-        "required" : [ "mefAmountCents", "nav", "orgAmountCents", "orgFiscalCode", "orgName", "reasonCode", "reasonDescription", "status" ]
+        }
+      },
+      "CategoryEnum" : {
+        "type" : "string",
+        "enum" : [ "NOT_FOUND", "BAD_REQUEST", "GENERIC_ERROR", "CONFLICT", "FORBIDDEN", "UNAUTHORIZED", "TOO_MANY_REQUESTS" ]
+      },
+      "ErrorDTO" : {
+        "required" : [ "category", "message" ],
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "$ref" : "#/components/schemas/CategoryEnum"
+          },
+          "code" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "fields" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ErrorFieldDTO"
+            }
+          },
+          "traceId" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }
+      },
+      "ErrorFieldDTO" : {
+        "required" : [ "error", "field", "message" ],
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
       }
     },
     "securitySchemes" : {

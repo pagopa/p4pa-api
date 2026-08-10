@@ -50,19 +50,54 @@
             "description" : "Ok"
           },
           "400" : {
-            "description" : "Invalid request"
+            "description" : "Invalid request",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
           },
           "401" : {
-            "description" : "Unauthorized - Missing or invalid token"
+            "description" : "Unauthorized - Missing or invalid token",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
           },
           "404" : {
-            "description" : "Not Found"
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
           },
           "409" : {
-            "description" : "Conflict"
+            "description" : "Conflict",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
           },
           "500" : {
-            "description" : "Internal Server Error"
+            "description" : "Internal Server Error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorDTO"
+                }
+              }
+            }
           }
         },
         "security" : [ {
@@ -94,9 +129,9 @@
           "description" : "Zero-based page index (0..N)",
           "required" : false,
           "schema" : {
+            "minimum" : 0,
             "type" : "integer",
-            "default" : 0,
-            "minimum" : 0
+            "default" : 0
           }
         }, {
           "name" : "size",
@@ -104,9 +139,9 @@
           "description" : "The size of the page to be returned",
           "required" : false,
           "schema" : {
+            "minimum" : 1,
             "type" : "integer",
-            "default" : 20,
-            "minimum" : 1
+            "default" : 20
           }
         }, {
           "name" : "sort",
@@ -136,7 +171,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedNoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -146,7 +181,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedNoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -156,7 +191,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/PagedNoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -202,7 +237,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -212,7 +247,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -222,7 +257,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -232,7 +267,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/NoticeCieDTO"
+                  "$ref" : "#/components/schemas/ErrorDTO"
                 }
               }
             }
@@ -246,7 +281,53 @@
   },
   "components" : {
     "schemas" : {
+      "CategoryEnum" : {
+        "type" : "string",
+        "enum" : [ "NOT_FOUND", "BAD_REQUEST", "GENERIC_ERROR", "CONFLICT", "FORBIDDEN", "UNAUTHORIZED", "TOO_MANY_REQUESTS" ]
+      },
+      "ErrorDTO" : {
+        "required" : [ "category", "message" ],
+        "type" : "object",
+        "properties" : {
+          "category" : {
+            "$ref" : "#/components/schemas/CategoryEnum"
+          },
+          "code" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "message" : {
+            "type" : "string"
+          },
+          "fields" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ErrorFieldDTO"
+            }
+          },
+          "traceId" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        }
+      },
+      "ErrorFieldDTO" : {
+        "required" : [ "error", "field", "message" ],
+        "type" : "object",
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "error" : {
+            "type" : "string"
+          },
+          "message" : {
+            "type" : "string"
+          }
+        }
+      },
       "IpzsUpdateNoticeStatusRequest" : {
+        "required" : [ "status" ],
         "type" : "object",
         "properties" : {
           "status" : {
@@ -254,10 +335,10 @@
           },
           "operationDate" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           }
-        },
-        "required" : [ "status" ]
+        }
       },
       "StatusEnum" : {
         "type" : "string",
@@ -268,6 +349,7 @@
         "enum" : [ "UNPAID", "PAID", "BURNED", "REFUNDED" ]
       },
       "NoticeCieDTO" : {
+        "required" : [ "mefAmountCents", "nav", "orgAmountCents", "reasonCode", "status" ],
         "type" : "object",
         "properties" : {
           "status" : {
@@ -275,11 +357,13 @@
           },
           "paymentDate" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           },
           "burnDate" : {
             "type" : "string",
-            "format" : "date-time"
+            "format" : "date-time",
+            "nullable" : true
           },
           "nav" : {
             "type" : "string"
@@ -288,7 +372,8 @@
             "type" : "string"
           },
           "reasonDescription" : {
-            "type" : "string"
+            "type" : "string",
+            "nullable" : true
           },
           "orgAmountCents" : {
             "type" : "integer",
@@ -298,10 +383,10 @@
             "type" : "integer",
             "format" : "int64"
           }
-        },
-        "required" : [ "mefAmountCents", "nav", "orgAmountCents", "reasonCode", "status" ]
+        }
       },
       "PagedNoticeCieDTO" : {
+        "required" : [ "content", "number", "size", "totalElements", "totalPages" ],
         "type" : "object",
         "properties" : {
           "content" : {
@@ -326,8 +411,7 @@
             "type" : "integer",
             "format" : "int64"
           }
-        },
-        "required" : [ "content", "number", "size", "totalElements", "totalPages" ]
+        }
       }
     },
     "securitySchemes" : {
